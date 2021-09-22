@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">ArkanoidChristmas</string>
+    <string name="button">START</string>
+    <string name="title_activity_game_over">game_over</string>
+    <string name="title_activity_win">win</string>
+    <string name="your_score">YOUR SCORE:</string>
+    <string name="play_again">Play Again</string>
+    <string name="ScoreText">SCORE:</string>
+    <string name="numberScore">0</string>
+    <string name="zero">0</string>
+    <string name="score">Score :</string>
+</resources>
