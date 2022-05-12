@@ -1,6 +1,6 @@
 package com.example.arkanoidchristmas
 
-enum class Direction{
+enum class Direction {
     RIGHT,
     LEFT,
 }
