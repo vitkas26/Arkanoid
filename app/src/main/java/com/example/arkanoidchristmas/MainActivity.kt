@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     @SuppressLint("ClickableViewAccessibility", "SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         bindingMainActivity = ActivityMainBinding.inflate(layoutInflater)
         val view = bindingMainActivity.root
         setContentView(view)
