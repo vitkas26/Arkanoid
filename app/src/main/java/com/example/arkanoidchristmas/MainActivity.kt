@@ -4,15 +4,17 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.KeyEvent.*
+import android.view.KeyEvent.KEYCODE_DPAD_LEFT
+import android.view.KeyEvent.KEYCODE_DPAD_RIGHT
 import android.view.View
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import com.example.arkanoidchristmas.databinding.ActivityMainBinding
+import com.example.arkanoidchristmas.model.Candy
 
 class MainActivity : AppCompatActivity() {
     private val elementsOnContainer = mutableListOf<Candy>()
@@ -39,30 +41,29 @@ class MainActivity : AppCompatActivity() {
         val button = findViewById<Button>(R.id.button)
         button.setOnClickListener {
             bindingMainActivity.container.removeView(button)
-
-            var left = 50
-            var top = 250
-            throwBall(25, 0)
-
-            for (i in 0..7) {
-                if (left < 1050 && top == 250) {
-                    blockContainer(left, top)
-                    left += 250
-                    if (left == 1050) top = 80
-                } else if (top == 80) {
-                    left -= 250
-                    top = 80
-                    blockContainer(left, top)
-                }
-            }
+            fillCandyContainer()
+            throwBall()
         }
     }
 
-    data class Candy(
-        val viewId: Int,
-        var topMargin: Int,
-        var leftMargin: Int
-    )
+    private fun fillCandyContainer() {
+        val startingPosition = Pair(50, 250)
+
+        var leftPosition = startingPosition.first
+        var topPosition = startingPosition.second
+
+        for (i in 0..7) {
+            if (leftPosition < 1050 && topPosition == 250) {
+                blockContainer(leftPosition, topPosition)
+                leftPosition += 250
+                if (leftPosition == 1050) topPosition = 80
+            } else if (topPosition == 80) {
+                leftPosition -= 250
+                topPosition = 80
+                blockContainer(leftPosition, topPosition)
+            }
+        }
+    }
 
     private fun blockContainer(leftMargin: Int, topMargin: Int) {
         val block = ImageView(bindingMainActivity.container.context)
@@ -87,12 +88,13 @@ class MainActivity : AppCompatActivity() {
         return super.onKeyDown(keyCode, event)
     }
 
-    private fun throwBall(top: Int, left: Int) {
-        var top = top
-        var threadCheck = 0
-        var left = 0
-        val activity = bindingMainActivity.container.context as Activity
-        val startPoint = bindingMainActivity.myBall.layoutParams as FrameLayout.LayoutParams
+    private fun throwBall() {
+        var topDistance = 25
+        var leftDistance = 0
+        var playGame = true
+
+        val candyContainer = this.bindingMainActivity.container
+        val ballPosition = bindingMainActivity.myBall.layoutParams as FrameLayout.LayoutParams
         val stick = bindingMainActivity.myStick.layoutParams as FrameLayout.LayoutParams
 
         val intentWin = Intent(this, Win::class.java)
@@ -101,115 +103,195 @@ class MainActivity : AppCompatActivity() {
         bindingMainActivity.textView3.visibility = View.VISIBLE
         bindingMainActivity.textView4.visibility = View.VISIBLE
 
-        Thread(Runnable {
-            while (threadCheck == 0) {
-                startPoint.topMargin = startPoint.topMargin + top
-                startPoint.leftMargin = startPoint.leftMargin + left
+        Thread {
+            while (playGame) {
+                ballPosition.topMargin += topDistance
+                ballPosition.leftMargin += leftDistance
                 Thread.sleep(30)
                 (bindingMainActivity.container.context as Activity).runOnUiThread {
                     bindingMainActivity.container.removeView(bindingMainActivity.myBall)
                     bindingMainActivity.container.addView(bindingMainActivity.myBall)
                 }
-                println("${startPoint.topMargin} / ${startPoint.leftMargin}, stick -> ${stick.topMargin} / ${stick.leftMargin}")
+                println("${ballPosition.topMargin} / ${ballPosition.leftMargin}, stick -> ${stick.topMargin} / ${stick.leftMargin}")
                 elementsOnContainer.forEach {
                     when {
-                        startPoint.topMargin in it.topMargin - 70..it.topMargin + 180 &&
-                                startPoint.leftMargin in it.leftMargin - 70..it.leftMargin + 180
-                        -> {
-                            (bindingMainActivity.container.context as Activity).runOnUiThread {
-                                bindingMainActivity.container.removeView(activity.findViewById(it.viewId))
-                                elementsOnContainer.remove(it)
-                                score += 10
-                                bindingMainActivity.textView4.text = score.toString()
-                            }
+                        whenColission(ballPosition, it) -> {
+                            runOnUiThread { onCandyCollision(candyContainer, it) }
+                            val directionResult =
+                                distinctBallDirectionAfterCollision(topDistance, leftDistance)
 
-                            if (top > 0) {
-                                top *= -1
-                                println(top)
-                            } else if (top < 0) {
-                                top *= -1
-                            }
-                            when {
-                                left > 0 -> {
-                                    left *= -1
-                                    println(left)
-                                }
-                                left < 0 -> {
-                                    left *= -1
-                                    println(left)
-                                }
-                                else -> left = 0
-                            }
+                            topDistance = directionResult.first
+                            leftDistance = directionResult.second
                         }
-                        startPoint.topMargin < 0 -> {
-                            top = 25
-                            when {
-                                left > 0 -> {
-                                    left *= 1
-                                    println(left)
-                                }
-                                left < 0 -> {
-                                    left *= 1
-                                    println(left)
-                                }
-                                else -> left = 0
-                            }
-                        }
-                        startPoint.leftMargin > 980 -> {
 
-                            when {
-                                left > 0 -> {
-                                    left *= -1
-                                    println(left)
-                                }
-//                                    left<0 -> {
-//                                        left *= 1
-//                                        println(left)
-//                                    }
-                                else -> println("suka")
-                            }
+                        whenBallIsGoingDown(ballPosition) -> {
+                            topDistance = 25
+                            leftDistance = distinctLeftDirectionWhenBallGoesDown(leftDistance)
                         }
-                        startPoint.leftMargin < 0 -> {
 
-                            if (left > 0) {
-                                left *= -1
-                                println(left)
-                            }
-                            if (left < 0) {
-                                left *= -1
-                            } else
-                                left = 0
+                        whenBallCollideWithRightBorder(ballPosition) -> {
+                            leftDistance =
+                                distinctLeftDirectionOnRightBorderColllision(leftDistance)
                         }
-                        startPoint.topMargin > 1584 || startPoint.leftMargin > 1000 -> {
-                            threadCheck = 1
+
+                        whenCollideLeftBorder(ballPosition) -> {
+                            leftDistance = distinctLeftDistanceOnLeftBorderCollision(leftDistance)
+                        }
+
+                        whenBallGoesOutOfScreen(ballPosition) -> {
+                            playGame = false
                             println("game over")
                             startActivity(intentGameOver)
                             finish()
                         }
-                        startPoint.topMargin in stick.topMargin - 100..stick.topMargin + 100 && startPoint.leftMargin in stick.leftMargin + 33..stick.leftMargin + 120 -> {
-                            top = -25
-                            left = 0
+
+                        checkStickCenterCollision(ballPosition, stick) -> {
+                            topDistance = -25
+                            leftDistance = 0
                         }
 
-                        startPoint.topMargin in stick.topMargin - 100..stick.topMargin + 120 && startPoint.leftMargin in stick.leftMargin - 50..stick.leftMargin + 33 -> {
-                            top = -25
-                            left = -15
+                        checkStickLeftCollision(ballPosition, stick) -> {
+                            topDistance = -25
+                            leftDistance = -15
                         }
-                        startPoint.topMargin in stick.topMargin - 100..stick.topMargin + 120 && startPoint.leftMargin in stick.leftMargin..stick.leftMargin + 250 -> {
-                            top = -25
-                            left = 15
+
+                        checkStickRightCollision(ballPosition, stick) -> {
+                            topDistance = -25
+                            leftDistance = 15
                         }
                     }
                 }
-                if (elementsOnContainer.isEmpty()) {
-                    threadCheck = 1
-                    intentWin.putExtra("value", score.toString())
-                    startActivity(intentWin)
-                    finish()
-                } else
-                    println("a few more")
+                playGame = checkWin(playGame, intentWin)
             }
-        }).start()
+        }.start()
+    }
+
+    private fun checkWin(playGame: Boolean, intentWin: Intent): Boolean {
+        var gameStatus = playGame
+        if (elementsOnContainer.isEmpty()) {
+            gameStatus = false
+            intentWin.putExtra("value", score.toString())
+            startActivity(intentWin)
+            finish()
+        } else
+            println("a few more")
+        return gameStatus
+    }
+
+    private fun checkStickRightCollision(
+        ballPosition: FrameLayout.LayoutParams,
+        stick: FrameLayout.LayoutParams
+    ) =
+        ballPosition.topMargin in stick.topMargin - 100..stick.topMargin + 120 && ballPosition.leftMargin in stick.leftMargin..stick.leftMargin + 250
+
+    private fun checkStickLeftCollision(
+        ballPosition: FrameLayout.LayoutParams,
+        stick: FrameLayout.LayoutParams
+    ) =
+        ballPosition.topMargin in stick.topMargin - 100..stick.topMargin + 120 && ballPosition.leftMargin in stick.leftMargin - 50..stick.leftMargin + 33
+
+    private fun checkStickCenterCollision(
+        ballPosition: FrameLayout.LayoutParams,
+        stick: FrameLayout.LayoutParams
+    ) = ballPosition.topMargin in stick.topMargin - 100..stick.topMargin + 100
+            && ballPosition.leftMargin in stick.leftMargin + 33..stick.leftMargin + 120
+
+    private fun whenBallGoesOutOfScreen(ballPosition: FrameLayout.LayoutParams) =
+        ballPosition.topMargin > 1584 || ballPosition.leftMargin > 1000
+
+    private fun distinctLeftDistanceOnLeftBorderCollision(leftDistance: Int): Int {
+        var newLeftDistance = leftDistance
+        if (newLeftDistance > 0) {
+            newLeftDistance *= -1
+            println(newLeftDistance)
+        }
+        if (newLeftDistance < 0) {
+            newLeftDistance *= -1
+        } else
+            newLeftDistance = 0
+        return newLeftDistance
+    }
+
+    private fun distinctLeftDirectionOnRightBorderColllision(leftDistance: Int): Int {
+        var newLeftDistance = leftDistance
+        when {
+            newLeftDistance > 0 -> {
+                newLeftDistance *= -1
+                println(newLeftDistance)
+            }
+
+            else -> println("suka")
+        }
+        return newLeftDistance
+    }
+
+    private fun whenCollideLeftBorder(startPoint: FrameLayout.LayoutParams) =
+        startPoint.leftMargin < 0
+
+    private fun whenBallCollideWithRightBorder(startPoint: FrameLayout.LayoutParams) =
+        startPoint.leftMargin > 980
+
+    private fun distinctLeftDirectionWhenBallGoesDown(leftDistance: Int): Int {
+        var newLeftDistance = leftDistance
+        when {
+            newLeftDistance > 0 -> {
+                newLeftDistance *= 1
+                println(newLeftDistance)
+            }
+
+            newLeftDistance < 0 -> {
+                newLeftDistance *= 1
+                println(newLeftDistance)
+            }
+
+            else -> newLeftDistance = 0
+        }
+        return newLeftDistance
+    }
+
+    private fun whenBallIsGoingDown(startPoint: FrameLayout.LayoutParams) = startPoint.topMargin < 0
+
+    private fun whenColission(
+        startPoint: FrameLayout.LayoutParams,
+        it: Candy
+    ) = startPoint.topMargin in it.topMargin - 70..it.topMargin + 180 &&
+            startPoint.leftMargin in it.leftMargin - 70..it.leftMargin + 180
+
+    private fun distinctBallDirectionAfterCollision(
+        topDistance: Int,
+        leftDistance: Int
+    ): Pair<Int, Int> {
+        var newTopDistance = topDistance
+        var newLeftDistance = leftDistance
+
+        if (newTopDistance > 0) {
+            newTopDistance *= -1
+            println(newTopDistance)
+        } else if (newTopDistance < 0) {
+            newTopDistance *= -1
+        }
+
+        when {
+            newLeftDistance > 0 -> {
+                newLeftDistance *= -1
+                println(newLeftDistance)
+            }
+
+            newLeftDistance < 0 -> {
+                newLeftDistance *= -1
+                println(newLeftDistance)
+            }
+
+            else -> newLeftDistance = 0
+        }
+        return Pair(newTopDistance, newLeftDistance)
+    }
+
+    private fun onCandyCollision(candyContainer: FrameLayout, it: Candy) {
+        bindingMainActivity.container.removeView(candyContainer.findViewById(it.viewId))
+        elementsOnContainer.remove(it)
+        score += 10
+        bindingMainActivity.textView4.text = score.toString()
     }
 
     private fun move(direction: Direction) {
@@ -221,6 +303,7 @@ class MainActivity : AppCompatActivity() {
                     (bindingMainActivity.myStick.layoutParams as FrameLayout.LayoutParams).leftMargin += 25
                 }
             }
+
             Direction.LEFT -> {
                 bindingMainActivity.myStick.rotation = 0f
                 if (layoutParams.leftMargin - 20 > 0) {
