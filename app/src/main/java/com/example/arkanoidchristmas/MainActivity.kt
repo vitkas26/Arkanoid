@@ -49,8 +49,7 @@ class MainActivity : AppCompatActivity() {
             @Suppress("DEPRECATION")
             savedInstanceState?.getSerializable(STATE_KEY) as? GameState
         }
-        engine = if (restoredState == null) GameEngine() else GameEngine(restoredState)
-        binding.gameView.engine = engine
+        restoreGameState(restoredState ?: GameEngine.newGame())
         binding.actionButton.setOnClickListener {
             when (engine.state.status) {
                 GameStatus.READY -> engine.start()
@@ -70,6 +69,12 @@ class MainActivity : AppCompatActivity() {
             insets
         }
         ViewCompat.requestApplyInsets(binding.root)
+    }
+
+    internal fun restoreGameState(state: GameState) {
+        stopFrameLoop()
+        engine = GameEngine(state)
+        binding.gameView.engine = engine
         renderState()
     }
 
