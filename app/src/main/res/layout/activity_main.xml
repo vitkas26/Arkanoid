@@ -1,73 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg"
-    tools:context=".MainActivity">
+    android:background="#102135">
+
+    <com.example.arkanoidchristmas.GameView
+        android:id="@+id/gameView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
     <TextView
-        android:id="@+id/textView4"
+        android:id="@+id/scoreText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="50dp"
-        android:visibility="invisible"
-        android:text="@string/zero" />
-
-    <ImageView
-            android:id="@+id/block"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="2000000000dp"
-            android:layout_marginLeft="0dp"
-            android:src="@drawable/block"
-            android:visibility="invisible"
-            />
-
-    <ImageView
-        android:id="@+id/myBall"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="425dp"
-        android:layout_marginLeft="180dp"
-        android:src="@drawable/ball"
-        />
-
-    <ImageView
-        android:id="@+id/myStick"
-        android:layout_width="100dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="462dp"
-        android:layout_marginLeft="145dp"
-        android:src="@drawable/stick" />
+        android:layout_gravity="top|start"
+        android:layout_margin="12dp"
+        android:background="#C0102135"
+        android:padding="8dp"
+        android:text="@string/score_default"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
 
     <LinearLayout
-        android:id="@+id/left"
-        android:layout_width="205dp"
-        android:layout_height="280dp"
-        android:layout_marginTop="425dp"
-        android:orientation="horizontal" />
-    <LinearLayout
-        android:id="@+id/right"
-        android:layout_marginTop="425dp"
-        android:layout_marginLeft="205dp"
-        android:layout_width="205dp"
-        android:layout_height="280dp"
-        android:orientation="horizontal" />
+        android:id="@+id/statusOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#B8102135"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="97dp"
-        android:layout_height="52dp"
-        android:layout_marginLeft="150dp"
-        android:layout_marginTop="300dp"
-        android:background="@drawable/button" />
+        <TextView
+            android:id="@+id/statusMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:gravity="center"
+            android:text="@string/game_title"
+            android:textColor="@android:color/white"
+            android:textSize="28sp" />
 
-    <TextView
-        android:id="@+id/textView3"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="invisible"
-        android:text="@string/score" />
+        <Button
+            android:id="@+id/actionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:minWidth="160dp"
+            android:text="@string/start" />
+    </LinearLayout>
 </FrameLayout>

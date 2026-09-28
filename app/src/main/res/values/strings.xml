@@ -9,4 +9,11 @@
     <string name="numberScore">0</string>
     <string name="zero">0</string>
     <string name="score">Score :</string>
+    <string name="game_title">Arkanoid Christmas</string>
+    <string name="start">Start game</string>
+    <string name="score_default">Score: 0</string>
+    <string name="score_value">Score: %1$d</string>
+    <string name="win_message">You win! Score: %1$d</string>
+    <string name="lose_message">Game over. Score: %1$d</string>
+    <string name="game_field_description">Game field. Drag to move the paddle.</string>
 </resources>

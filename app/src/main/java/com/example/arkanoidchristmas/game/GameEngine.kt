@@ -10,7 +10,7 @@ object GameWorld {
     const val HEIGHT = 700f
     const val BALL_RADIUS = 18f
     const val PADDLE_WIDTH = 100f
-    const val PADDLE_HEIGHT = 28f
+    const val PADDLE_HEIGHT = 50f
     const val PADDLE_TOP = 620f
     const val PADDLE_STEP = 24f
     const val BRICK_SCORE = 10
@@ -156,7 +156,7 @@ class GameEngine(initialState: GameState = newGame()) {
         fun newGame(): GameState {
             val bricks = (0 until 2).flatMap { row ->
                 (0 until 4).map { column ->
-                    Brick(left = 20f + column * 95f, top = 75f + row * 85f, width = 80f, height = 42f)
+                    Brick(left = 20f + column * 95f, top = 75f + row * 120f, width = 80f, height = 80f)
                 }
             }
             return GameState(
