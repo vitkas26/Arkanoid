@@ -134,6 +134,43 @@ class GameEngineTest {
         assertEquals(GameEngine.newGame(), engine.state)
     }
 
+    @Test fun runningGameIgnoresNonPositiveAndNonFiniteFrames() {
+        val deltas = listOf(0f, -0.01f, Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY)
+
+        // Each delta gets a fresh engine and all mismatches are reported together.
+        val changed = deltas.filter { delta ->
+            val engine = running(Point(200f, 400f), Point(130f, -270f))
+            val before = engine.state
+            engine.update(delta)
+            engine.state != before
+        }
+
+        assertEquals(emptyList<Float>(), changed)
+    }
+
+    @Test fun finishedGameIgnoresPaddleMovement() {
+        val moves = listOf<Pair<String, (GameEngine) -> Unit>>(
+            "movePaddleTo(left)" to { it.movePaddleTo(0f) },
+            "movePaddleTo(right)" to { it.movePaddleTo(GameWorld.WIDTH) },
+            "movePaddleBy(+step)" to { it.movePaddleBy(GameWorld.PADDLE_STEP) },
+            "movePaddleBy(-step)" to { it.movePaddleBy(-GameWorld.PADDLE_STEP) },
+        )
+
+        val changed = listOf(GameStatus.WON, GameStatus.LOST).flatMap { status ->
+            moves.mapNotNull { (name, move) ->
+                val engine = GameEngine(
+                    running(Point(120f, 300f), Point(130f, -270f)).state
+                        .copy(paddleLeft = 120f, status = status),
+                )
+                val before = engine.state
+                move(engine)
+                if (engine.state != before) "$status $name" else null
+            }
+        }
+
+        assertEquals(emptyList<String>(), changed)
+    }
+
     private fun paddleHitAt(x: Float): GameEngine = running(
         Point(x, GameWorld.PADDLE_TOP - GameWorld.BALL_RADIUS - 1f),
         Point(0f, 200f),

@@ -3,6 +3,7 @@ package com.example.arkanoidchristmas.game
 import java.io.Serializable
 import kotlin.math.abs
 import kotlin.math.min
+import kotlin.math.sign
 
 /** Coordinates are game units, independent of Android pixels and screen density. */
 object GameWorld {
@@ -13,6 +14,8 @@ object GameWorld {
     const val PADDLE_HEIGHT = 50f
     const val PADDLE_TOP = 620f
     const val PADDLE_STEP = 24f
+    /** Maximum speed of the paddle when following a touch target, in game units per second. */
+    const val PADDLE_SPEED = 600f
     const val BRICK_SCORE = 10
 }
 
@@ -38,6 +41,9 @@ class GameEngine(initialState: GameState = newGame()) {
     var state: GameState = initialState
         private set
 
+    /** Left edge the paddle is travelling to (touch input); not part of [GameState]. */
+    private var paddleTargetLeft: Float? = null
+
     fun start() {
         if (state.status == GameStatus.READY) {
             state = state.copy(status = GameStatus.RUNNING)
@@ -45,11 +51,29 @@ class GameEngine(initialState: GameState = newGame()) {
     }
 
     fun restart() {
+        paddleTargetLeft = null
         state = newGame()
     }
 
+    /**
+     * Touch input: while RUNNING the paddle travels towards [centerX] at no more than
+     * [GameWorld.PADDLE_SPEED] during [update] and keeps going after the finger is lifted.
+     * Before the first launch the paddle still follows directly so the ball can be aimed.
+     */
+    fun setPaddleTarget(centerX: Float) {
+        if (!centerX.isFinite()) return
+        when (state.status) {
+            GameStatus.READY -> movePaddleTo(centerX)
+            GameStatus.RUNNING -> paddleTargetLeft = (centerX - GameWorld.PADDLE_WIDTH / 2f)
+                .coerceIn(0f, GameWorld.WIDTH - GameWorld.PADDLE_WIDTH)
+            GameStatus.WON, GameStatus.LOST -> Unit
+        }
+    }
+
+    /** Direct (instant) move for keys and service code; cancels any touch target. */
     fun movePaddleTo(centerX: Float) {
         if (state.status == GameStatus.WON || state.status == GameStatus.LOST) return
+        paddleTargetLeft = null
         val left = (centerX - GameWorld.PADDLE_WIDTH / 2f)
             .coerceIn(0f, GameWorld.WIDTH - GameWorld.PADDLE_WIDTH)
         state = state.copy(
@@ -71,9 +95,23 @@ class GameEngine(initialState: GameState = newGame()) {
         var remaining = deltaSeconds.coerceAtMost(0.1f)
         while (remaining > 0f && state.status == GameStatus.RUNNING) {
             val step = min(remaining, 1f / 120f)
+            stepPaddle(step)
             advance(step)
             remaining -= step
         }
+    }
+
+    private fun stepPaddle(step: Float) {
+        val target = paddleTargetLeft ?: return
+        val distance = target - state.paddleLeft
+        val maxMove = GameWorld.PADDLE_SPEED * step
+        val left = if (abs(distance) <= maxMove) {
+            paddleTargetLeft = null
+            target
+        } else {
+            state.paddleLeft + sign(distance) * maxMove
+        }
+        state = state.copy(paddleLeft = left)
     }
 
     private fun advance(step: Float) {

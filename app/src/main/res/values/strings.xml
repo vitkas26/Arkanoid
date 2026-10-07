@@ -1,11 +1,22 @@
 <resources>
     <string name="app_name">ArkanoidChristmas</string>
-    <string name="play_again">Play Again</string>
     <string name="game_title">Arkanoid Christmas</string>
-    <string name="start">Start game</string>
-    <string name="score_default">Score: 0</string>
-    <string name="score_value">Score: %1$d</string>
-    <string name="win_message">You win! Score: %1$d</string>
-    <string name="lose_message">Game over. Score: %1$d</string>
+    <string name="start">Начать игру</string>
+    <string name="ready_caption">Двигай ракетку и разбей все блоки</string>
+    <string name="score_default">Счёт: 0</string>
+    <string name="score_value">Счёт: %1$d</string>
+    <string name="score_label">Ваш счёт</string>
+    <string name="win_title">Победа!</string>
+    <string name="win_caption">Все блоки разбиты — праздник удался!</string>
+    <string name="win_button">Ещё раз</string>
+    <string name="win_icon_description">Золотой кубок</string>
+    <string name="lose_title">Не повезло</string>
+    <string name="lose_caption">Мяч ускользнул. В следующий раз получится!</string>
+    <string name="lose_button">Попробовать снова</string>
+    <string name="lose_icon_description">Повторить попытку</string>
+    <string name="pause_button">Пауза</string>
+    <string name="pause_title">Пауза</string>
+    <string name="pause_caption">Игра остановлена. Мяч и счёт сохранены.</string>
+    <string name="resume">Продолжить</string>
     <string name="game_field_description">Game field. Drag to move the paddle.</string>
 </resources>

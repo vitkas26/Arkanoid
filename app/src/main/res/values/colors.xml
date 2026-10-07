@@ -3,4 +3,19 @@
     <color name="colorPrimary">#C60E3C</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#F8F4F6</color>
+
+    <color name="end_dim">#CC050B16</color>
+    <color name="end_button_text">#10203A</color>
+    <color name="end_text_primary">#FFFFFF</color>
+    <color name="end_text_secondary">#C9D6EA</color>
+
+    <color name="win_card_start">#0B1E4A</color>
+    <color name="win_card_end">#1B3570</color>
+    <color name="win_gold">#FFC83D</color>
+    <color name="win_gold_pressed">#E0A818</color>
+
+    <color name="lose_card_start">#1F4169</color>
+    <color name="lose_card_end">#2C5686</color>
+    <color name="lose_coral">#FF7F6E</color>
+    <color name="lose_coral_pressed">#E5624F</color>
 </resources>
