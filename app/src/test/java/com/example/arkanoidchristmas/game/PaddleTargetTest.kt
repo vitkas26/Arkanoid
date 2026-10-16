@@ -97,7 +97,11 @@ class PaddleTargetTest {
     }
 
     @Test fun targetSetWhileRunningDoesNotMoveFinishedGame() {
-        val engine = running(paddleLeft = 100f, ball = Point(20f, GameWorld.HEIGHT + GameWorld.BALL_RADIUS - 1f))
+        val engine = running(
+            paddleLeft = 100f,
+            ball = Point(20f, GameWorld.HEIGHT + GameWorld.BALL_RADIUS - 1f),
+            lives = 1,
+        )
         engine.setPaddleTarget(centerFor(maxLeft))
         engine.update(0.02f)
         assertEquals(GameStatus.LOST, engine.state.status)
@@ -134,8 +138,10 @@ class PaddleTargetTest {
     private fun running(
         paddleLeft: Float,
         ball: Point = Point(200f, 400f),
+        lives: Int = GameWorld.MAX_LIVES,
     ): GameEngine = GameEngine(
         GameEngine.newGame().copy(
+            lives = lives,
             ball = ball,
             velocity = if (ball.y > GameWorld.HEIGHT) Point(0f, 200f) else Point(0f, 0f),
             paddleLeft = paddleLeft,

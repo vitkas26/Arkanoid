@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.example.arkanoidchristmas.MaxHeightScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialogScroll"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/dialog_card"
+    android:orientation="vertical"
+    android:padding="@dimen/dialog_padding">
+
+    <TextView
+        style="@style/Widget.Ark.DialogTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/exit_title" />
+
+
+        <TextView
+            android:id="@+id/exitMessage"
+            android:layout_marginTop="12dp"
+            style="@style/Widget.Ark.DialogText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/exitConfirm"
+        style="@style/Widget.Ark.Button.Primary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/exit_confirm" />
+
+    <Button
+        android:id="@+id/exitCancel"
+        style="@style/Widget.Ark.Button.Secondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/cancel" />
+</LinearLayout>
+</com.example.arkanoidchristmas.MaxHeightScrollView>

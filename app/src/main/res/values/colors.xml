@@ -12,6 +12,8 @@
     <color name="win_card_start">#0B1E4A</color>
     <color name="win_card_end">#1B3570</color>
     <color name="win_gold">#FFC83D</color>
+    <color name="secondary_pressed">#274A94</color>
+    <color name="win_gold_dim">#55FFC83D</color>
     <color name="win_gold_pressed">#E0A818</color>
 
     <color name="lose_card_start">#1F4169</color>

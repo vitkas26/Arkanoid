@@ -73,14 +73,16 @@ class GameEngineTest {
         assertTrue(paddleHitAt(235f).state.velocity.x > 0f)
     }
 
-    @Test fun missedPaddleCausesLossAndStaysTerminal() {
+    @Test fun missedPaddleOnLastLifeCausesLossAndStaysTerminal() {
         val engine = running(
             Point(20f, GameWorld.HEIGHT + GameWorld.BALL_RADIUS - 1f),
             Point(0f, 200f),
+            lives = 1,
         )
         engine.update(0.02f)
 
         assertEquals(GameStatus.LOST, engine.state.status)
+        assertEquals(0, engine.state.lives)
         val lost = engine.state
         engine.update(0.1f)
         assertEquals(lost, engine.state)
@@ -97,7 +99,7 @@ class GameEngineTest {
     }
 
     @Test fun lastBrickEndsGameWithWin() {
-        val engine = brickHitEngine(GameEngine.newGame().bricks.take(1))
+        val engine = brickHitEngine(listOf(GameEngine.newGame().bricks.last()))
         engine.update(0.02f)
 
         assertEquals(GameStatus.WON, engine.state.status)
@@ -106,7 +108,11 @@ class GameEngineTest {
     }
 
     @Test fun oneFrameCannotRemoveTwoAdjacentBricks() {
-        val bricks = GameEngine.newGame().bricks.take(2)
+        // Two bricks of the same row with the smallest gap between them (level 1 is a tree, so the
+        // first two list entries are no longer neighbours).
+        val all = GameEngine.newGame().bricks
+        val first = all.first { a -> all.any { b -> b.top == a.top && b.left > a.left } }
+        val bricks = listOf(first, all.filter { it.top == first.top && it.left > first.left }.minByOrNull { it.left }!!)
         val xBetweenBricks = (bricks[0].right + bricks[1].left) / 2f
         val engine = running(
             Point(xBetweenBricks, bricks[0].bottom + GameWorld.BALL_RADIUS + 1f),
@@ -176,19 +182,24 @@ class GameEngineTest {
         Point(0f, 200f),
     ).apply { update(0.02f) }
 
-    private fun brickHitEngine(bricks: List<Brick>): GameEngine = running(
-        Point(bricks.first().left + bricks.first().width / 2f,
-            bricks.first().bottom + GameWorld.BALL_RADIUS + 1f),
-        Point(0f, -200f),
-        bricks,
-    )
+    /** Ball just below the lowest brick of the first column, so only that brick can be hit. */
+    private fun brickHitEngine(bricks: List<Brick>): GameEngine {
+        val target = bricks.maxByOrNull { it.bottom }!!
+        return running(
+            Point(target.left + target.width / 2f, target.bottom + GameWorld.BALL_RADIUS + 1f),
+            Point(0f, -200f),
+            bricks,
+        )
+    }
 
     private fun running(
         ball: Point,
         velocity: Point,
         bricks: List<Brick> = GameEngine.newGame().bricks,
+        lives: Int = GameWorld.MAX_LIVES,
     ): GameEngine = GameEngine(
         GameEngine.newGame().copy(
+            lives = lives,
             ball = ball,
             velocity = velocity,
             bricks = bricks,
